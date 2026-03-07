@@ -131,11 +131,19 @@ auth.onAuthStateChanged(user => {
 // ── Editor ──
 function execCmd(cmd,val) { document.getElementById('editor-area').focus(); document.execCommand(cmd,false,val||null); }
 function execHeading(tag) { document.getElementById('editor-area').focus(); document.execCommand('formatBlock',false,tag); }
+function transformEmoji(url) {
+    if (!url) return null;
+    if (url.startsWith(':emoji {') && url.endsWith(' }:')) {
+        return "src/emojis/" + url.slice(8, -3)
+    } else {
+        return url;
+    }
+}
 function insertImageUrl() {
-    const url = document.getElementById('img-url-inp').value.trim();
+    const url = transformEmoji(document.getElementById('img-url-inp').value.trim());
     if (!url) return;
     document.getElementById('editor-area').focus();
-    document.execCommand('insertHTML',false,`<img src="${url}" style="max-width:100%;image-rendering:pixelated;" alt=""/>`);
+    document.execCommand('insertHTML',false,`<img src="${url}" style="max-width:100%;image-rendering:crisp-edges;" alt=""/>`);
     document.getElementById('img-url-inp').value='';
 }
 function insertUploadedImage(input) {
