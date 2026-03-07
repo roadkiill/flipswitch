@@ -147,7 +147,7 @@ function insertUploadedImage(input) {
 
 // ── Posts ──
 async function publishPost() {
-    if (!isAdmin) return;
+    if (!(currentUser && !(currentUser && currentUser.isAnonymous) && getAdmin().includes(currentUser.email))) return;
     const title = document.getElementById('post-title').value.trim();
     const body  = document.getElementById('editor-area').innerHTML.trim();
     if (!title||!body||body==='<br>') { showToast('Title and body required.',true); return; }
