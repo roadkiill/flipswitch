@@ -133,8 +133,8 @@ function execCmd(cmd,val) { document.getElementById('editor-area').focus(); docu
 function execHeading(tag) { document.getElementById('editor-area').focus(); document.execCommand('formatBlock',false,tag); }
 function transformEmoji(url) {
     if (!url) return null;
-    if (url.startsWith(':emoji {') && url.endsWith(' }:')) {
-        return "src/emojis/" + url.slice(8, -3)
+    if (url.startsWith(':emoji {') && url.endsWith('}:')) {
+        return "src/emojis/" + url.slice(8, -2) + ".png"
     } else {
         return url;
     }
