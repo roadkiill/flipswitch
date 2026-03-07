@@ -143,13 +143,13 @@ function insertImageUrl() {
     const url = transformEmoji(document.getElementById('img-url-inp').value.trim());
     if (!url) return;
     document.getElementById('editor-area').focus();
-    document.execCommand('insertHTML',false,`<img src="${url}" style="max-width:100%;image-rendering:crisp-edges;" alt=""/>`);
+    document.execCommand('insertHTML',false,`<img src="${url}" style="max-width:100%;max-height: 50px;image-rendering:crisp-edges;" alt=""/>`);
     document.getElementById('img-url-inp').value='';
 }
 function insertUploadedImage(input) {
     if (!input.files||!input.files[0]) return;
     const r = new FileReader();
-    r.onload = e => { document.getElementById('editor-area').focus(); document.execCommand('insertHTML',false,`<img src="${e.target.result}" style="max-width:100%;image-rendering:pixelated;" alt=""/>`); };
+    r.onload = e => { document.getElementById('editor-area').focus(); document.execCommand('insertHTML',false,`<img src="${e.target.result}" style="max-width:100%;max-height: 50px;image-rendering:pixelated;" alt=""/>`); };
     r.readAsDataURL(input.files[0]); input.value='';
 }
 
