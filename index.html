@@ -4,471 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FLIPSWITCH</title>
-  <link rel="icon" type="image/png" href="FS_small.png"/>
+  <link rel="icon" type="image/png" href="/src/favicon.ico"/>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --mc-gui-light:   #ffffff;
-      --mc-gui-dark:    #555555;
-      --mc-gui-face:    #8b8b8b;
-      --mc-inv-bg:      #3d3d3d;
-      --mc-inv-shadow:  #1e1e1e;
-      --mc-inv-light:   #8b8b8b;
-      --mc-white:       #f0f0f0;
-      --mc-yellow:      #ffff55;
-      --mc-gold:        #ffaa00;
-      --mc-gray:        #aaaaaa;
-      --mc-green:       #55ff55;
-      --mc-red:         #ff5555;
-      --mc-aqua:        #55ffff;
-      --mc-yellow-s:    #3f3f00;
-      --mc-gray-s:      #2a2a2a;
-      --mc-white-s:     #3c3c3c;
-      --mc-green-s:     #003f00;
-      --mc-red-s:       #3f0000;
-      --mc-aqua-s:      #003f3f;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: auto; }
-
-    body {
-      font-family: 'Press Start 2P', monospace;
-      min-height: 100vh;
-      /* Minecraft dirt bg — CSS approximation of the dirt block texture */
-      background-color: #866043;
-      background-image:
-        repeating-conic-gradient(#7a5636 0% 25%, #8f6a4a 0% 50%) 0 0 / 4px 4px,
-        radial-gradient(#6b4c33 1px, transparent 1px) 0 0 / 8px 8px,
-        radial-gradient(#9a7050 1px, transparent 1px) 4px 4px / 8px 8px;
-      color: var(--mc-white);
-      image-rendering: pixelated;
-    }
-
-    ::-webkit-scrollbar { width: 6px; background: #3d3d3d; }
-    ::-webkit-scrollbar-thumb { background: #5a5a5a; }
-
-    /* ── MC BUTTON (pixel-perfect recreation) ── */
-    .mc-btn {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 8px;
-      letter-spacing: 0.5px;
-      color: var(--mc-gray);
-      text-shadow: 2px 2px 0 var(--mc-gray-s);
-      background: #555;
-      border-top:    2px solid #888;
-      border-left:   2px solid #888;
-      border-right:  2px solid #222;
-      border-bottom: 2px solid #222;
-      padding: 8px 14px;
-      cursor: pointer;
-      display: inline-block;
-      line-height: 1;
-      user-select: none;
-    }
-    .mc-btn:hover {
-      background: #6a7ca0;
-      color: var(--mc-yellow);
-      text-shadow: 2px 2px 0 var(--mc-yellow-s);
-      border-color: #aabbdd #2a3850 #2a3850 #aabbdd;
-    }
-    .mc-btn:active { border-color: #222 #888 #888 #222; transform: translate(1px,1px); }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      height: 52px;
-      background: #3d3d3d;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 16px;
-      /* Bevel: top highlight, bottom shadow, plus a grass-green accent strip at top */
-      border-top:    3px solid var(--mc-gui-light);
-      border-bottom: 3px solid var(--mc-inv-shadow);
-      box-shadow: 0 3px 0 #1e1e1e;
-    }
-    nav::before {
-      content: '';
-      position: absolute; top: -3px; left: 0; right: 0; height: 3px;
-      background: #5d9c2e;
-    }
-    .nav-logo-wrap { cursor: pointer; }
-    .nav-logo {
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-      height: 34px; width: auto;
-      display: block;
-    }
-    .nav-links { display: flex; gap: 4px; align-items: center; }
-    .nav-links .mc-btn { font-size: 7px; padding: 7px 10px; }
-    #auth-btn {
-      background: #1e2233;
-      color: var(--mc-aqua);
-      text-shadow: 2px 2px 0 var(--mc-aqua-s);
-      border-color: #4466aa #0a1122 #0a1122 #4466aa;
-    }
-    #auth-btn:hover { background: #2a3a6a; color: var(--mc-yellow); text-shadow: 2px 2px 0 var(--mc-yellow-s); }
-
-    /* ── MAIN ── */
-    main { padding-top: 52px; }
-    .section { display: none; min-height: calc(100vh - 52px - 80px); }
-    .section.active { display: block; }
-    .page-inner { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
-
-    /* ── MC PANEL (inventory/GUI panel style) ── */
-    .mc-panel {
-      background: var(--mc-inv-bg);
-      border-top:    2px solid var(--mc-inv-light);
-      border-left:   2px solid var(--mc-inv-light);
-      border-right:  2px solid var(--mc-inv-shadow);
-      border-bottom: 2px solid var(--mc-inv-shadow);
-    }
-
-    /* ── SECTION HEADING ── */
-    .section-heading {
-      font-size: 9px;
-      color: var(--mc-white);
-      text-shadow: 2px 2px 0 var(--mc-white-s);
-      letter-spacing: 1px;
-      margin-bottom: 16px;
-    }
-
-    /* ── HOME ── */
-    #section-home { text-align: center; }
-    .home-center { display: flex; flex-direction: column; align-items: center; padding: 48px 16px 0; }
-    .hero-logo {
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-      width: min(640px, 88vw);
-      height: auto;
-      display: block;
-      margin-bottom: 28px;
-    }
-    .hero-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 48px; }
-    .hero-btns .mc-btn { font-size: 8px; padding: 10px 20px; min-width: 140px; text-align: center; }
-
-    /* ── CARD (MC item-slot aesthetic) ── */
-    .mc-card {
-      background: var(--mc-inv-bg);
-      border-top:    2px solid var(--mc-inv-light);
-      border-left:   2px solid var(--mc-inv-light);
-      border-right:  2px solid var(--mc-inv-shadow);
-      border-bottom: 2px solid var(--mc-inv-shadow);
-      padding: 14px 16px;
-      margin-bottom: 6px;
-      cursor: pointer;
-    }
-    .mc-card:hover { background: #4a4a6a; }
-    .mc-card-title {
-      font-size: 8px; color: var(--mc-white);
-      text-shadow: 2px 2px 0 var(--mc-white-s);
-      margin-bottom: 8px; line-height: 2;
-    }
-    .mc-card-meta {
-      font-size: 6px; color: var(--mc-gray);
-      text-shadow: 1px 1px 0 var(--mc-gray-s);
-      margin-bottom: 8px; line-height: 2;
-    }
-    .mc-card-preview {
-      font-size: 7px; color: var(--mc-gray);
-      text-shadow: 1px 1px 0 #2a2a2a;
-      line-height: 2.2;
-    }
-
-    /* ── NEWS DETAIL ── */
-    #news-detail { display: none; }
-    .news-back-btn { margin-bottom: 12px; }
-    .news-detail-title {
-      font-size: 9px; color: var(--mc-yellow);
-      text-shadow: 2px 2px 0 var(--mc-yellow-s);
-      line-height: 2; margin-bottom: 6px;
-    }
-    .news-detail-meta {
-      font-size: 6px; color: var(--mc-gray);
-      text-shadow: 1px 1px 0 var(--mc-gray-s);
-      margin-bottom: 16px;
-    }
-    .news-detail-body {
-      font-size: 7px; line-height: 2.6;
-      color: var(--mc-white);
-      text-shadow: 1px 1px 0 var(--mc-white-s);
-    }
-    .news-detail-body img { max-width: 100%; display: block; margin: 10px 0; image-rendering: pixelated; }
-    .news-detail-body b, .news-detail-body strong { color: #fff; }
-    .news-detail-body i, .news-detail-body em { color: var(--mc-gray); }
-    .news-detail-body h1 { font-size: 10px; color: var(--mc-yellow); text-shadow: 2px 2px 0 var(--mc-yellow-s); margin: 14px 0 8px; line-height:2; }
-    .news-detail-body h2 { font-size: 9px;  color: var(--mc-yellow); text-shadow: 2px 2px 0 var(--mc-yellow-s); margin: 12px 0 6px; line-height:2; }
-    .news-detail-body h3 { font-size: 8px;  color: var(--mc-gray);   text-shadow: 1px 1px 0 var(--mc-gray-s);   margin: 10px 0 6px; line-height:2; }
-    .news-detail-body ul, .news-detail-body ol { padding-left: 18px; margin: 8px 0; }
-    .news-detail-body li { margin: 4px 0; line-height: 2.2; }
-
-    /* ── ADMIN EDITOR ── */
-    #admin-editor { display: none; margin-bottom: 20px; }
-    .admin-label {
-      font-size: 6px; color: var(--mc-aqua);
-      text-shadow: 1px 1px 0 var(--mc-aqua-s);
-      margin-bottom: 8px; display: block; line-height: 2;
-    }
-    .mc-input {
-      width: 100%;
-      background: #000;
-      border-top:    2px solid #1e1e1e;
-      border-left:   2px solid #1e1e1e;
-      border-right:  2px solid #8b8b8b;
-      border-bottom: 2px solid #8b8b8b;
-      color: var(--mc-white);
-      font-family: 'Press Start 2P', monospace;
-      font-size: 8px;
-      padding: 8px 10px;
-      margin-bottom: 8px;
-      outline: none;
-      line-height: 1.8;
-      caret-color: #fff;
-    }
-    .mc-input::placeholder { color: #444; }
-    .mc-input:focus { border-right-color: #aaa; border-bottom-color: #aaa; }
-
-    .editor-toolbar {
-      display: flex; flex-wrap: wrap; gap: 3px;
-      padding: 6px;
-      background: #2a2a2a;
-      border-top:    2px solid #1e1e1e;
-      border-left:   2px solid #1e1e1e;
-      border-right:  2px solid #6a6a6a;
-      border-bottom: 2px solid #6a6a6a;
-      margin-bottom: 4px;
-    }
-    .tb-btn {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 7px;
-      background: #555;
-      border-top:    1px solid #888; border-left: 1px solid #888;
-      border-right:  1px solid #222; border-bottom: 1px solid #222;
-      color: var(--mc-gray); text-shadow: 1px 1px 0 #2a2a2a;
-      padding: 4px 8px; cursor: pointer; line-height: 1.6;
-    }
-    .tb-btn:hover { background: #6a7ca0; color: var(--mc-yellow); text-shadow: 1px 1px 0 var(--mc-yellow-s); }
-    .tb-sep { width: 2px; background: #1e1e1e; margin: 2px; }
-
-    #editor-area {
-      width: 100%; min-height: 160px;
-      background: #000;
-      border-top:    2px solid #1e1e1e; border-left:  2px solid #1e1e1e;
-      border-right:  2px solid #8b8b8b; border-bottom: 2px solid #8b8b8b;
-      color: var(--mc-white); font-family: 'Press Start 2P', monospace;
-      font-size: 7px; padding: 10px; outline: none;
-      line-height: 2.2; caret-color: #fff;
-    }
-    .img-row { display: flex; gap: 4px; align-items: center; margin: 4px 0; flex-wrap: wrap; }
-    .img-row input[type="file"] { display: none; }
-    .img-file-lbl {
-      font-family: 'Press Start 2P', monospace; font-size: 6px;
-      background: #1e2233;
-      border-top: 1px solid #4466aa; border-left: 1px solid #4466aa;
-      border-right: 1px solid #0a1122; border-bottom: 1px solid #0a1122;
-      color: var(--mc-aqua); text-shadow: 1px 1px 0 var(--mc-aqua-s);
-      padding: 5px 9px; cursor: pointer;
-    }
-    .img-url-inp {
-      flex: 1; min-width: 140px;
-      background: #000;
-      border-top: 1px solid #1e1e1e; border-left: 1px solid #1e1e1e;
-      border-right: 1px solid #6a6a6a; border-bottom: 1px solid #6a6a6a;
-      color: var(--mc-white); font-family: 'Press Start 2P', monospace;
-      font-size: 6px; padding: 5px 8px; outline: none;
-    }
-    .delete-btn {
-      font-family: 'Press Start 2P', monospace; font-size: 6px;
-      background: #3a0e0e;
-      border-top: 1px solid #7a3333; border-left: 1px solid #7a3333;
-      border-right: 1px solid #1e0000; border-bottom: 1px solid #1e0000;
-      color: var(--mc-red); text-shadow: 1px 1px 0 var(--mc-red-s);
-      padding: 4px 8px; cursor: pointer; margin-top: 8px;
-    }
-    .delete-btn:hover { background: #7a1e1e; color: #fff; }
-
-    /* ── ABOUT ── */
-    .about-body {
-      font-size: 7px; line-height: 2.8;
-      color: var(--mc-white); text-shadow: 1px 1px 0 var(--mc-white-s);
-      padding: 16px;
-      background: var(--mc-inv-bg);
-      border-top:    2px solid var(--mc-inv-light);
-      border-left:   2px solid var(--mc-inv-light);
-      border-right:  2px solid var(--mc-inv-shadow);
-      border-bottom: 2px solid var(--mc-inv-shadow);
-    }
-    .about-body p { margin-bottom: 14px; }
-    .about-subhead {
-      display: block; font-size: 8px;
-      color: var(--mc-yellow); text-shadow: 2px 2px 0 var(--mc-yellow-s);
-      margin: 16px 0 8px;
-    }
-    .about-subhead:first-child { margin-top: 0; }
-
-    /* ── FAQ ── */
-    .faq-item {
-      margin-bottom: 5px;
-      background: var(--mc-inv-bg);
-      border-top:    2px solid var(--mc-inv-light);
-      border-left:   2px solid var(--mc-inv-light);
-      border-right:  2px solid var(--mc-inv-shadow);
-      border-bottom: 2px solid var(--mc-inv-shadow);
-    }
-    .faq-q {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      padding: 14px 16px; cursor: pointer; gap: 12px; user-select: none;
-    }
-    .faq-q:hover { background: #4a4a6a; }
-    .faq-q-text {
-      font-size: 7px; color: var(--mc-yellow);
-      text-shadow: 2px 2px 0 var(--mc-yellow-s);
-      line-height: 2.2; flex: 1;
-    }
-    .faq-arrow {
-      font-size: 8px; color: var(--mc-gray);
-      text-shadow: 1px 1px 0 var(--mc-gray-s);
-      flex-shrink: 0; margin-top: 2px;
-      transition: transform 0.15s;
-    }
-    .faq-item.open .faq-arrow { transform: scaleY(-1); }
-    .faq-a {
-      display: none;
-      padding: 12px 16px 14px;
-      font-size: 7px; color: var(--mc-white);
-      text-shadow: 1px 1px 0 var(--mc-white-s);
-      line-height: 2.6;
-      border-top: 2px solid var(--mc-inv-shadow);
-    }
-    .faq-item.open .faq-a { display: block; }
-
-    /* ── AUTH MODAL ── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0; z-index: 2000;
-      background: rgba(0,0,0,0.72);
-      background-image: repeating-conic-gradient(rgba(90,60,30,0.06) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal-box {
-      width: 100%; max-width: 370px; margin: 12px;
-      /* outer bevel */
-      background: var(--mc-gui-face);
-      border-top:    3px solid var(--mc-gui-light);
-      border-left:   3px solid var(--mc-gui-light);
-      border-right:  3px solid var(--mc-gui-dark);
-      border-bottom: 3px solid var(--mc-gui-dark);
-      padding: 3px;
-    }
-    .modal-inner {
-      background: #3d3d3d;
-      border-top:    2px solid #8b8b8b;
-      border-left:   2px solid #8b8b8b;
-      border-right:  2px solid #1e1e1e;
-      border-bottom: 2px solid #1e1e1e;
-      padding: 22px 18px 18px;
-      position: relative;
-    }
-    .modal-title {
-      font-size: 9px; color: var(--mc-white);
-      text-shadow: 2px 2px 0 var(--mc-white-s);
-      text-align: center; margin-bottom: 18px; letter-spacing: 1px;
-    }
-    .modal-close {
-      position: absolute; top: 10px; right: 12px;
-      background: none; border: none;
-      font-family: 'Press Start 2P', monospace; font-size: 9px;
-      color: var(--mc-gray); text-shadow: 1px 1px 0 var(--mc-gray-s);
-      cursor: pointer; line-height: 1;
-    }
-    .modal-close:hover { color: var(--mc-red); text-shadow: 1px 1px 0 var(--mc-red-s); }
-    .modal-tab-row { display: flex; gap: 4px; margin-bottom: 14px; }
-    .modal-tab {
-      flex: 1; font-family: 'Press Start 2P', monospace; font-size: 7px;
-      padding: 8px; text-align: center; cursor: pointer;
-      background: #555;
-      border-top: 1px solid #888; border-left: 1px solid #888;
-      border-right: 1px solid #222; border-bottom: 1px solid #222;
-      color: var(--mc-gray); text-shadow: 1px 1px 0 var(--mc-gray-s);
-    }
-    .modal-tab.active { background: #6a7ca0; color: var(--mc-yellow); text-shadow: 2px 2px 0 var(--mc-yellow-s); }
-    .auth-form { display: none; }
-    .auth-form.active { display: block; }
-    .auth-msg { font-size: 6px; text-align: center; padding: 6px; margin-top: 4px; line-height: 2; }
-    .auth-msg.error   { color: var(--mc-red);   text-shadow: 1px 1px 0 var(--mc-red-s); }
-    .auth-msg.success { color: var(--mc-green); text-shadow: 1px 1px 0 var(--mc-green-s); }
-    .modal-btn {
-      width: 100%; font-family: 'Press Start 2P', monospace; font-size: 8px;
-      padding: 11px; text-align: center; cursor: pointer;
-      background: #555; color: var(--mc-gray); text-shadow: 2px 2px 0 var(--mc-gray-s);
-      border-top: 2px solid #888; border-left: 2px solid #888;
-      border-right: 2px solid #222; border-bottom: 2px solid #222;
-      margin-bottom: 6px; letter-spacing: 0.5px;
-    }
-    .modal-btn:hover { background: #6a7ca0; color: var(--mc-yellow); text-shadow: 2px 2px 0 var(--mc-yellow-s); }
-    .modal-btn.danger {
-      background: #3a0e0e; color: var(--mc-red); text-shadow: 2px 2px 0 var(--mc-red-s);
-      border-color: #7a3333 #1e0000 #1e0000 #7a3333;
-    }
-    .modal-btn.danger:hover { background: #7a1e1e; color: #fff; }
-
-    /* ── TOAST (chat message style) ── */
-    #toast {
-      position: fixed; bottom: 18px; left: 50%;
-      transform: translateX(-50%) translateY(12px);
-      z-index: 3000;
-      background: rgba(0,0,0,0.75);
-      border-left: 3px solid #555;
-      color: var(--mc-white); text-shadow: 1px 1px 0 var(--mc-white-s);
-      font-family: 'Press Start 2P', monospace; font-size: 7px;
-      padding: 8px 14px; line-height: 2;
-      opacity: 0; transition: opacity 0.2s, transform 0.2s;
-      pointer-events: none; white-space: nowrap;
-    }
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    #toast.err  { border-left-color: var(--mc-red); color: var(--mc-red); text-shadow: 1px 1px 0 var(--mc-red-s); }
-
-    /* ── USER BAR ── */
-    .user-bar {
-      font-size: 6px; color: var(--mc-gray); text-shadow: 1px 1px 0 var(--mc-gray-s);
-      padding: 6px 10px; background: #2a2a2a;
-      border-left: 3px solid var(--mc-green);
-      margin-bottom: 14px; line-height: 2;
-    }
-    .user-bar .uname { color: var(--mc-green); text-shadow: 1px 1px 0 var(--mc-green-s); }
-    .user-bar .rank  { color: var(--mc-yellow); text-shadow: 1px 1px 0 var(--mc-yellow-s); margin-left: 8px; }
-
-    .no-posts {
-      text-align: center; padding: 40px 20px;
-      font-size: 7px; color: var(--mc-gray);
-      text-shadow: 1px 1px 0 var(--mc-gray-s); line-height: 3;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      background: #2a2a2a;
-      border-top: 2px solid #1e1e1e;
-      text-align: center; padding: 22px 16px;
-      font-size: 6px; color: var(--mc-gray);
-      text-shadow: 1px 1px 0 var(--mc-gray-s);
-      line-height: 3;
-    }
-    footer .f-name { font-size: 8px; color: var(--mc-white); text-shadow: 2px 2px 0 var(--mc-white-s); }
-    footer .f-name span.flip  { color: #aaaaaa; }
-    footer .f-name span.sw    { color: #ffaa00; }
-
-    @media (max-width: 560px) {
-      .nav-links .mc-btn { font-size: 6px; padding: 6px 7px; }
-      .hero-logo { width: min(300px, 88vw); }
-    }
-  </style>
+  <link rel="stylesheet" href="src/default.css">
 </head>
 <body>
 
 <!-- ═══ NAV ═══ -->
 <nav>
   <div class="nav-logo-wrap" onclick="showSection('home')">
-    <img src="FS_long.png" class="nav-logo" alt="FLIPSWITCH"
-         onerror="this.outerHTML='<span style=\'font-family:Press Start 2P,monospace;font-size:9px;cursor:pointer;\' onclick=\'showSection(&quot;home&quot;)\'><span style=\'color:#aaaaaa;text-shadow:2px 2px 0 #2a2a2a\'>FLIP</span><span style=\'color:#ffaa00;text-shadow:2px 2px 0 #3f2800\'>SWITCH</span></span>'"/>
+    <img src="src/title.png" class="nav-logo" alt="FLIPSWITCH"
+         onerror="this.outerHTML='<span class=\'imgerrorthingidkwhatthisis\' onclick=\'showSection(&quot;home&quot;)\'><span style=\'color:#aaaaaa;text-shadow:2px 2px 0 #2a2a2a\'>FLIP</span><span style=\'color:#ffaa00;text-shadow:2px 2px 0 #3f2800\'>SWITCH</span></span>'"/>
   </div>
   <div class="nav-links">
     <button class="mc-btn" onclick="showSection('home')">Home</button>
@@ -478,10 +24,8 @@
     <button class="mc-btn" id="auth-btn" onclick="openAuthModal()">Log In</button>
   </div>
 </nav>
-
 <!-- ═══ TOAST ═══ -->
 <div id="toast"></div>
-
 <!-- ═══ AUTH MODAL ═══ -->
 <div class="modal-overlay" id="auth-modal">
   <div class="modal-box">
@@ -495,15 +39,20 @@
       </div>
 
       <div class="auth-form active" id="form-login">
+        <label class="form-label" for="login-email">Email</label>
         <input class="mc-input" type="email" id="login-email" placeholder="Email" autocomplete="email"/>
+        <label class="form-label" for="login-pass">Password</label>
         <input class="mc-input" type="password" id="login-pass" placeholder="Password" autocomplete="current-password"/>
         <button class="modal-btn" onclick="doLogin()">Sign In</button>
         <div class="auth-msg" id="login-msg"></div>
       </div>
 
       <div class="auth-form" id="form-register">
+        <label class="form-label" for="reg-name">Display Name</label>
         <input class="mc-input" type="text" id="reg-name" placeholder="Display name" autocomplete="username"/>
+        <label class="form-label" for="reg-email">Email</label>
         <input class="mc-input" type="email" id="reg-email" placeholder="Email" autocomplete="email"/>
+        <label class="form-label" for="reg-pass">Password</label>
         <input class="mc-input" type="password" id="reg-pass" placeholder="Password (6+ chars)" autocomplete="new-password"/>
         <button class="modal-btn" onclick="doRegister()">Create Account</button>
         <div class="auth-msg" id="reg-msg"></div>
@@ -526,7 +75,7 @@
   <!-- HOME -->
   <div class="section active" id="section-home">
     <div class="home-center">
-      <img src="FS_long.png" class="hero-logo" alt="FLIPSWITCH"
+      <img src="src/title.png" class="hero-logo" alt="FLIPSWITCH"
            onerror="this.outerHTML='<h1 style=\'margin-bottom:24px;font-size:clamp(16px,4vw,36px);line-height:1.6;\'><span style=\'color:#aaaaaa;text-shadow:3px 3px 0 #2a2a2a\'>FLIP</span><span style=\'color:#ffaa00;text-shadow:3px 3px 0 #3f2800\'>SWITCH</span></h1>'"/>
       <div class="hero-btns">
         <button class="mc-btn" onclick="showSection('about')">About</button>
@@ -549,6 +98,7 @@
       <!-- Admin Editor -->
       <div id="admin-editor">
         <span class="admin-label">Posting as: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7c0e150a190e1a0e1311101d12183c1b111d1510521f1311">[email&#160;protected]</a></span>
+        <label class="form-label" for="post-title">Title</label>
         <input class="mc-input" id="post-title" placeholder="Post title..."/>
         <div class="editor-toolbar">
           <button class="tb-btn" onclick="execCmd('bold')"><b>B</b></button>
@@ -573,6 +123,7 @@
         <div class="img-row">
           <label class="img-file-lbl" for="img-file-input">Upload Image</label>
           <input type="file" id="img-file-input" accept="image/*" onchange="insertUploadedImage(this)"/>
+          <label class="img-file-lbl" for="img-url-inp">Image URL</label>
           <input class="img-url-inp" id="img-url-inp" placeholder="Image URL..."/>
           <button class="tb-btn" onclick="insertImageUrl()">Insert</button>
         </div>
@@ -682,254 +233,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<script>
-// ═══════════════════════════════════════════════════════
-// CREDENTIAL ENCRYPTION — XOR + base64
-//
-// HOW TO SET UP:
-//   1. Open this file in a browser (can be local).
-//   2. Open DevTools > Console.
-//   3. Run:  encodeVal("your-real-api-key")
-//            encodeVal("your-auth-domain")
-//            etc.
-//   4. Paste the returned strings into _EC below.
-//
-// Change CIPHER_KEY to any random string before deploying.
-// ═══════════════════════════════════════════════════════
-const CIPHER_KEY = "fswitch_k9mQzR3pLwBvNtCdHjGsUoEy"; // change this
-
-function xorCipher(str, key) {
-  let o = '';
-  for (let i = 0; i < str.length; i++)
-    o += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-  return o;
-}
-function encodeVal(plain) { return btoa(xorCipher(plain, CIPHER_KEY)); }
-function decodeVal(enc)   { return xorCipher(atob(enc), CIPHER_KEY); }
-
-// ── Encrypted Firebase credentials (XOR + base64) ──
-const _EC = {
-  apiKey:            "JzoNCCcaKhEZChQdTTR4GHsvHQwNAycdOCsKGWUfKAk3C0ECIyol",
-  authDomain:        "AB8eGQcUASsIUUBjGGNWSGIRKwQrFiIXLQs3A3sMKhQ=",
-  projectId:         "AB8eGQcUASsIUUBjGGNWSA==",
-  storageBucket:     "AB8eGQcUASsIUUBjGGNWSGIRKwQrFiIXLRkzHCcOIhxIEgcZ",
-  messagingSenderId: "X0ZOXUdbX2pSDFpi",
-  appId:             "V0lOXE1XW2dcDFRkTWEJBykVeEB8QHZRKlxzRGMKdk4DEEBZQ1IMZgg=",
-  measurementId:     "IV4kLEU7MgcyalkB",
-};
-const _EML = "FBoBDAYFGjAGVQw/HhJUHS0eLlgtGy4=";
-function getAdmin() { return decodeVal(_EML); }
-
-// ═══════════════════════════════════════════════════════
-firebase.initializeApp({
-  apiKey:            decodeVal(_EC.apiKey),
-  authDomain:        decodeVal(_EC.authDomain),
-  projectId:         decodeVal(_EC.projectId),
-  storageBucket:     decodeVal(_EC.storageBucket),
-  messagingSenderId: decodeVal(_EC.messagingSenderId),
-  appId:             decodeVal(_EC.appId),
-  measurementId:     decodeVal(_EC.measurementId),
-});
-const auth = firebase.auth();
-const db   = firebase.firestore();
-
-let currentUser = null, isAdmin = false, allPosts = [];
-
-// ── Nav ──
-function showSection(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('section-' + id).classList.add('active');
-  if (id !== 'news') closeNewsDetail(true);
-  window.scrollTo(0, 0);
-}
-
-// ── FAQ ──
-function toggleFaq(el) { el.classList.toggle('open'); }
-
-// ── Auth modal ──
-function openAuthModal() {
-  document.getElementById('auth-modal').classList.add('open');
-  const isAnon = !!(currentUser && currentUser.isAnonymous);
-  if (currentUser && !isAnon) {
-    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    document.getElementById('form-loggedin').classList.add('active');
-    document.getElementById('logged-in-name').textContent = currentUser.displayName || currentUser.email || 'Player';
-    document.getElementById('modal-heading').textContent = 'Account';
-    document.getElementById('modal-tabs').style.display = 'none';
-  } else {
-    document.getElementById('modal-heading').textContent = 'Player Login';
-    document.getElementById('modal-tabs').style.display = '';
-    switchAuthTab('login', document.querySelector('.modal-tab'));
-  }
-}
-function closeAuthModal() { document.getElementById('auth-modal').classList.remove('open'); }
-function switchAuthTab(tab, el) {
-  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('form-' + tab).classList.add('active');
-  if (el) el.classList.add('active');
-}
-
-// ── Auth actions ──
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
-  const msg   = document.getElementById('login-msg');
-  setMsg(msg,'','');
-  if (!email||!pass) { setMsg(msg,'Fill in all fields.','error'); return; }
-  try { await auth.signInWithEmailAndPassword(email,pass); closeAuthModal(); showToast('Signed in.'); }
-  catch(e) { setMsg(msg,fmtErr(e.code),'error'); }
-}
-async function doRegister() {
-  const name  = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const pass  = document.getElementById('reg-pass').value;
-  const msg   = document.getElementById('reg-msg');
-  setMsg(msg,'','');
-  if (!name||!email||!pass) { setMsg(msg,'Fill in all fields.','error'); return; }
-  if (pass.length<6) { setMsg(msg,'Password must be 6+ characters.','error'); return; }
-  try {
-    const c = await auth.createUserWithEmailAndPassword(email,pass);
-    await c.user.updateProfile({ displayName: name });
-    closeAuthModal(); showToast('Account created.');
-  } catch(e) { setMsg(msg,fmtErr(e.code),'error'); }
-}
-async function doLogout() { await auth.signOut(); closeAuthModal(); showToast('Signed out.'); }
-function setMsg(el,txt,cls) { el.textContent=txt; el.className='auth-msg '+cls; }
-function fmtErr(code) {
-  return ({'auth/user-not-found':'No account with that email.','auth/wrong-password':'Wrong password.',
-    'auth/invalid-email':'Invalid email.','auth/email-already-in-use':'Email already in use.',
-    'auth/weak-password':'Password too weak.','auth/too-many-requests':'Too many attempts.',
-    'auth/invalid-credential':'Invalid email or password.'})[code]||code;
-}
-
-// ── Auth state ──
-auth.onAuthStateChanged(user => {
-  currentUser = user;
-  const isAnon = !!(user && user.isAnonymous);
-  isAdmin = !!(user && !isAnon && user.email === getAdmin());
-  const btn = document.getElementById('auth-btn');
-  if (user && !isAnon) {
-    const label = user.displayName || user.email || 'Player';
-    btn.textContent = label.split(/[@\s]/)[0];
-    btn.style.cssText = 'background:#1e331e;color:var(--mc-green);text-shadow:1px 1px 0 var(--mc-green-s);border-color:#448844 #0a1a0a #0a1a0a #448844;';
-  } else {
-    btn.textContent = 'Log In';
-    btn.style.cssText = 'background:#1e2233;color:var(--mc-aqua);text-shadow:2px 2px 0 var(--mc-aqua-s);border-color:#4466aa #0a1122 #0a1122 #4466aa;';
-  }
-  document.getElementById('admin-editor').style.display = isAdmin ? 'block' : 'none';
-  const bar = document.getElementById('user-status-bar');
-  if (user && !isAnon) {
-    const label = user.displayName || user.email || 'Player';
-    bar.style.display = 'block';
-    bar.innerHTML = `<div class="user-bar">Signed in as <span class="uname">${label}</span>${isAdmin?'<span class="rank">[ADMIN]</span>':''}</div>`;
-  } else { bar.style.display = 'none'; }
-  renderNewsList();
-});
-
-// ── Editor ──
-function execCmd(cmd,val) { document.getElementById('editor-area').focus(); document.execCommand(cmd,false,val||null); }
-function execHeading(tag) { document.getElementById('editor-area').focus(); document.execCommand('formatBlock',false,tag); }
-function insertImageUrl() {
-  const url = document.getElementById('img-url-inp').value.trim();
-  if (!url) return;
-  document.getElementById('editor-area').focus();
-  document.execCommand('insertHTML',false,`<img src="${url}" style="max-width:100%;image-rendering:pixelated;"/>`);
-  document.getElementById('img-url-inp').value='';
-}
-function insertUploadedImage(input) {
-  if (!input.files||!input.files[0]) return;
-  const r = new FileReader();
-  r.onload = e => { document.getElementById('editor-area').focus(); document.execCommand('insertHTML',false,`<img src="${e.target.result}" style="max-width:100%;image-rendering:pixelated;"/>`); };
-  r.readAsDataURL(input.files[0]); input.value='';
-}
-
-// ── Posts ──
-async function publishPost() {
-  if (!isAdmin) return;
-  const title = document.getElementById('post-title').value.trim();
-  const body  = document.getElementById('editor-area').innerHTML.trim();
-  if (!title||!body||body==='<br>') { showToast('Title and body required.',true); return; }
-  const btn = document.getElementById('pub-btn');
-  btn.disabled=true; btn.textContent='Publishing...';
-  try {
-    await db.collection('posts').add({ title, body, author:currentUser.email, authorName:currentUser.displayName||'Admin', createdAt:firebase.firestore.FieldValue.serverTimestamp() });
-    document.getElementById('post-title').value='';
-    document.getElementById('editor-area').innerHTML='';
-    showToast('Published.'); loadPosts();
-  } catch(e) { showToast(e.message,true); }
-  btn.disabled=false; btn.textContent='Publish';
-}
-async function loadPosts() {
-  try {
-    const snap = await db.collection('posts').orderBy('createdAt','desc').get();
-    allPosts = snap.docs.map(d=>({id:d.id,...d.data()}));
-  } catch(e) { console.warn('Firestore:',e.message); allPosts=[]; }
-  renderNewsList(); renderHomeNews();
-}
-function renderNewsList() {
-  const el = document.getElementById('news-list');
-  if (!allPosts.length) { el.innerHTML='<div class="no-posts">No posts yet.</div>'; return; }
-  el.innerHTML = allPosts.map(p=>`
-    <div class="mc-card" onclick="openPost('${p.id}')">
-      <div class="mc-card-title">${esc(p.title)}</div>
-      <div class="mc-card-meta">${fmtDate(p.createdAt)}  -  ${p.authorName||'Admin'}</div>
-      <div class="mc-card-preview">${strip(p.body).slice(0,100)}${p.body.length>100?'...':''}</div>
-      ${isAdmin?`<button class="delete-btn" onclick="delPost(event,'${p.id}')">Delete</button>`:''}
-    </div>`).join('');
-}
-function renderHomeNews() {
-  const el = document.getElementById('home-news-list');
-  const r = allPosts.slice(0,3);
-  if (!r.length) { el.innerHTML='<div class="no-posts">No posts yet.</div>'; return; }
-  el.innerHTML = r.map(p=>`
-    <div class="mc-card" onclick="showSection('news');setTimeout(()=>openPost('${p.id}'),50)">
-      <div class="mc-card-title">${esc(p.title)}</div>
-      <div class="mc-card-meta">${fmtDate(p.createdAt)}</div>
-      <div class="mc-card-preview">${strip(p.body).slice(0,80)}...</div>
-    </div>`).join('');
-}
-function openPost(id) {
-  const p = allPosts.find(x=>x.id===id); if (!p) return;
-  document.getElementById('detail-title').textContent = p.title;
-  document.getElementById('detail-meta').textContent  = fmtDate(p.createdAt)+'  -  '+(p.authorName||'Admin');
-  document.getElementById('detail-body').innerHTML    = p.body;
-  document.getElementById('news-list').style.display  = 'none';
-  document.getElementById('admin-editor').style.display = 'none';
-  document.getElementById('news-detail').style.display  = 'block';
-  window.scrollTo(0,0);
-}
-function closeNewsDetail(silent) {
-  document.getElementById('news-detail').style.display = 'none';
-  document.getElementById('news-list').style.display   = '';
-  if (isAdmin) document.getElementById('admin-editor').style.display = 'block';
-}
-async function delPost(e,id) {
-  e.stopPropagation();
-  if (!confirm('Delete this post?')) return;
-  try { await db.collection('posts').doc(id).delete(); showToast('Deleted.'); loadPosts(); }
-  catch(err) { showToast(err.message,true); }
-}
-
-// ── Util ──
-function esc(s)  { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function strip(s){ return s.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); }
-function fmtDate(ts) {
-  if (!ts) return '';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
-}
-function showToast(msg,err)  {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className='show'+(err?' err':'');
-  clearTimeout(window._tt);
-  window._tt = setTimeout(()=>{ t.className=''; },3000);
-}
-
-// Sign in anonymously so Firestore reads work for all visitors
-auth.signInAnonymously().catch(() => {});
-
-loadPosts();
-</script>
+<script src="src/default.js"></script>
 </body>
 </html>
