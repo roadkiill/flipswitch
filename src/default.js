@@ -108,7 +108,7 @@ function fmtErr(code) {
 auth.onAuthStateChanged(user => {
     currentUser = user;
     const isAnon = !!(user && user.isAnonymous);
-    const isAdmin = !!(user && !isAnon && getAdmin().includes(user.email));
+    isAdmin = !!(user && !isAnon && getAdmin().includes(user.email));
     const btn = document.getElementById('auth-btn');
     if (user && !isAnon) {
         const label = user.displayName || user.email || 'Player';
