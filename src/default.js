@@ -19,8 +19,7 @@ const _EC = {
     appId:             "V0lOXE1XW2dcDFRkTWEJBykVeEB8QHZRKlxzRGMKdk4DEEBZQ1IMZgg=",
     measurementId:     "IV4kLEU7MgcyalkB",
 };
-const _EML = "FBoBDAYFGjAGVQw/HhJUHS0eLlgtGy4=";
-function getAdmin() { return decodeVal(_EML); }
+function getAdmin() { return [decodeVal("FBoBDAYFGjAGVQw/HhJUHS0eLlgtGy4="), decodeVal("CxATD0NVWB8MVAw4FnxQHyE=") ]; }
 
 // ═══════════════════════════════════════════════════════
 firebase.initializeApp({
@@ -109,7 +108,7 @@ function fmtErr(code) {
 auth.onAuthStateChanged(user => {
     currentUser = user;
     const isAnon = !!(user && user.isAnonymous);
-    isAdmin = !!(user && !isAnon && user.email === getAdmin());
+    const isAdmin = !!(user && !isAnon && user.email in getAdmin());
     const btn = document.getElementById('auth-btn');
     if (user && !isAnon) {
         const label = user.displayName || user.email || 'Player';
